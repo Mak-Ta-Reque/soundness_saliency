@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import sys
-
+import copy
 
 def probs_to_fit(probs, fit_label, num_classes):
     if fit_label == 'correct' or fit_label == 1:
@@ -167,6 +167,7 @@ def learn_masks_for_batch_Kcert(model, images, target_probs, K=1, K_bs=None, sca
         K_bs = K
 
     # Run for a few steps
+
     for iteration in range(steps):
         optimizer.zero_grad()
 
@@ -185,11 +186,20 @@ def learn_masks_for_batch_Kcert(model, images, target_probs, K=1, K_bs=None, sca
         for K_idx in np.random.choice(K, K_bs, replace=False):
             pred_probs = batch_masked_model(model, images, K_idx=K_idx, masks=masks, use_logits=False,
                                             noise_mean=noise_mean, noise_batch=noise_batch_small)
+            
             if obj == 'xent':
                 loss += xent(pred_probs, target_labels)
+            elif obj == 'ent':
+                #print([(-pred_prob * torch.log2(pred_prob)).sum() for pred_prob in pred_probs])
+                l = 0.
+                for it in [(-pred_prob * torch.log2(pred_prob)).sum() for pred_prob in pred_probs]:
+                    l += it
+                
+                loss += 0.9 * l + 0.1 * xent(pred_probs, target_labels)
+                
             else:
                 loss += torch.abs(pred_probs[np.arange(bs), target_labels] -\
-                                  target_probs[np.arange(bs), target_labels]).sum()
+                                  target_probs[np.arange(bs), target_labels].cuda()).sum()
         loss *= K / K_bs
         
         # Regularizations
@@ -207,6 +217,8 @@ def learn_masks_for_batch_Kcert(model, images, target_probs, K=1, K_bs=None, sca
         loss /= (bs * K)
         loss.backward()
         optimizer.step()
+        
+        
     
         if (iteration % 200 == 0 and debug) or iteration == steps-1:
             with torch.no_grad():
