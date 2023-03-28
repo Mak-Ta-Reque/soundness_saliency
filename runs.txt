@@ -1,0 +1,1 @@
+python saliency_certificate_Imagenet_desktop_entropy.py  --label_list 0  --image_input_path input_data/sample_images.npy --label_input_path input_data/sample_labels.npy  --steps 4000 --lr 0.1 --bs 10 --noise_mode rand_image --noise_bs 5 --K 1 --scale_list 4 --reg_l1_list 0.00002 --reg_tv_list 0.01 --fit_label correct  --start_end 0 300 --debug --loss xent
