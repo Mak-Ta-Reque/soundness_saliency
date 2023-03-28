@@ -47,8 +47,8 @@ def main():
 
   
     ###Create directory to store results if need be #######
-    if not os.path.exists('results'):
-        os.makedirs('results')
+    if not os.path.exists(f'{args.out_dir}/explantions'):
+        os.makedirs(f'{args.out_dir}/explantions')
 
 
     ####### Start training masks #######
@@ -93,11 +93,11 @@ def main():
         noise_images = None
     elif noise_mode == 'rand_image':
         noise_images = torch.from_numpy(np.load('./noise_images.npy'))
-    dump_dir =  "results"
-    try: 
-        os.makedirs(dump_dir) 
-    except OSError as error: 
-        print(error)
+    dump_dir = f'{args.out_dir}/explantions'
+    #try: 
+    #    os.makedirs(dump_dir) 
+    #except OSError as error: 
+    #    print(error)
 
     print('Start training', flush=True)
     for idx in range(start_idx, min(end_idx, all_images.shape[0]), bs):

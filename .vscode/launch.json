@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "justMyCode": false,
+            "name": "Explanation",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/saliency_certificate_Imagenet_desktop_entropy.py",
+            "python": "/home/abka03/tareque_venv/bin/python3",
+            "args": [ "--label_list", "0",  "--image_input_path", "input_data/sample_images.npy",
+                 "--label_input_path", "input_data/sample_labels.npy",  "--steps", "4000", 
+                 "--lr", "0.1",
+                  "--bs", "2",
+                  "--noise_mode", "rand_image",
+                  "--noise_bs", "5",
+                  "--K", "1",
+                  "--scale_list", "4",
+                  "--reg_l1_list", "0.00002", 
+                  "--reg_tv_list", "0.01",
+                  "--fit_label", "correct",
+                  "--start_end", "0", "20",
+                  "--debug", "--obj", "ent"],
+            "console": "integratedTerminal",
+        },
+    ]
+}
