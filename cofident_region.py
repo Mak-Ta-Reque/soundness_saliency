@@ -1,7 +1,7 @@
 '''
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib/:$LD_LIBRARY_PATH
 
-python saliency_certificate_Imagenet_desktop.py  --label_list 526  527 664 673 782 851  --image_input_path input_data/sample_images.npy --label_input_path input_data/sample_labels.npy  --steps 2000 --lr 0.05 \
+python saliency_certificate_Imagenet_desktop.py --steps 2000 --lr 0.05 \
 --bs 10 --noise_mode rand_image --noise_bs 10 --K 1 \
 --scale_list 4 --reg_l1_list 0.00002 --reg_tv_list 0.01 \
 --fit_label correct  \
@@ -26,18 +26,8 @@ import cv2
 def main():
     args = parse()
     image_name = args.image_input_path
-    label_name = args.label_input_path
     channel, height, width = 3, 224, 224
-    num_classes = 10
     tot_pixels = height * width
-    label_list = args.label_list 
-    label_map = {v : k for k, v in enumerate(label_list)}
-        
-    
-    print('Loading selected data from ', image_name, ' and ', label_name)
-    all_images = torch.from_numpy(np.load(os.path.join(image_name)))
-    all_labels = torch.from_numpy(np.load(os.path.join(label_name)))
-
     ######### Load the (image, label) data and check model accuracy #########
     print('Using ResNet50 pretrained on imagenet')
     model = torchvision.models.resnet50(pretrained=False).cuda()

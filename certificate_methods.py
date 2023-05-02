@@ -150,7 +150,8 @@ def batch_mask_Kcert_l1(masks):
     return masks[:-1].sum()
 
 
-def learn_masks_for_batch_Kcert(model, images, target_probs, K=1, K_bs=None, scale=1,
+
+def learn_masks_for_batch_Kcert(model, images, target_probs = None, K=1, K_bs=None, scale=1,
                                 opt=optim.Adam, lr=0.05, steps=2000, obj='xent',
                                 noise_mean=None, noise_batch=None, noise_bs=1,
                                 reg_l1=0.001, reg_tv=0., reg_ent=0., old_mask=None, debug=True):
@@ -158,7 +159,10 @@ def learn_masks_for_batch_Kcert(model, images, target_probs, K=1, K_bs=None, sca
     model.eval()
     bs, n, h, w = images.shape
     images = images.cuda()
-    target_labels = target_probs.argmax(dim=1).cuda()
+    if target_probs is None:
+        target_labels = []
+    else:
+        target_labels = target_probs.argmax(dim=1).cuda()
 
     batch_masked_model = BatchMaskedModelKcert(n, h, w, K=K, scale=float(scale), bs=bs, old_mask=old_mask).cuda()
     optimizer = opt([batch_masked_model.weights], lr=lr)
@@ -182,11 +186,12 @@ def learn_masks_for_batch_Kcert(model, images, target_probs, K=1, K_bs=None, sca
 
         # Main loss
         loss = 0.
+
         masks = batch_masked_model.mask()
         for K_idx in np.random.choice(K, K_bs, replace=False):
             pred_probs = batch_masked_model(model, images, K_idx=K_idx, masks=masks, use_logits=False,
                                             noise_mean=noise_mean, noise_batch=noise_batch_small)
-            
+
             if obj == 'xent':
                 loss += xent(pred_probs, target_labels)
             elif obj == 'ent':
@@ -195,13 +200,19 @@ def learn_masks_for_batch_Kcert(model, images, target_probs, K=1, K_bs=None, sca
                 for it in [(-pred_prob * torch.log2(pred_prob)).sum() for pred_prob in pred_probs]:
                     l += it
                 
-                loss += 0.9 * l + 0.1 * xent(pred_probs, target_labels)
+                loss += l #+ 0.1 * xent(pred_probs, target_labels)
                 
+            elif obj == 'hybrid':
+                #print([(-pred_prob * torch.log2(pred_prob)).sum() for pred_prob in pred_probs])
+                l = 0.
+                for it in [(-pred_prob * torch.log2(pred_prob)).sum() for pred_prob in pred_probs]:
+                    l += it
+                
+                loss += 0.9 * l + 0.1 * xent(pred_probs, target_labels)
             else:
                 loss += torch.abs(pred_probs[np.arange(bs), target_labels] -\
                                   target_probs[np.arange(bs), target_labels].cuda()).sum()
         loss *= K / K_bs
-        
         # Regularizations
         torch_zero = torch.tensor([0.])
         l1_norm, tv_term, ent_term = torch_zero, torch_zero, torch_zero

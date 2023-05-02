@@ -15,11 +15,11 @@ import numpy as np
 
 
 DATA_DIR = '/n/fs/ptml/dingliy/saliency/adversarial/data'
-OUT_DIR = '/mnt/XMG4THD/abka03_data/entropy_explantion'
+OUT_DIR = '/mnt/sda/abka03-data/explantion_entropy'
 # ImageNet stuff
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]    
-IMAGENET_DIR = '/mnt/XMG4THD/abka03_data/imagenet/imagenette2'
+IMAGENET_DIR = '/mnt/sda/abka03-data/imagenet/imagenette2-320'
 # Cifar-10 stuff
 CIFAR_MEAN = [0.4914, 0.4822, 0.4465]
 CIFAR_STD = [0.2023, 0.1994, 0.2010]
