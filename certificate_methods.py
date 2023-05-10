@@ -201,7 +201,7 @@ def learn_masks_for_batch_Kcert(model, images, target_probs = None, K=1, K_bs=No
                     l += it
                 
                 loss += l #+ 0.1 * xent(pred_probs, target_labels)
-                
+                #loss = 1/loss
             elif obj == 'hybrid':
                 #print([(-pred_prob * torch.log2(pred_prob)).sum() for pred_prob in pred_probs])
                 l = 0.
